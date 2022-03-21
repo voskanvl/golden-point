@@ -1,24 +1,11 @@
 let dataBeforeDays = [];
-async function initDataBeforeDays() {
-    if (!dataBeforeDays.length) {
-        const arrUrls = beforeDaysUrlArray(
-            11,
-            "https://www.cbr-xml-daily.ru/archive/",
-            "/daily_json.js",
-        );
-        const res = await fetchBeforeDays(arrUrls);
-        dataBeforeDays = res;
-    }
-}
+
 async function fetchBeforeDays(arrUrls) {
     let res = [];
     for (let url of arrUrls) {
         console.log(url.match(/(\d+)/g).reverse().join("."));
         try {
-            let r = await fetch(url, {
-                // mode: "no-cors",
-            });
-            console.log("🚀 ~ r", r, url);
+            let r = await fetch(url);
             if (r.ok) {
                 r = await r.json();
                 res.push(r);
@@ -47,12 +34,27 @@ function beforeDaysUrlArray(volume, prefix, postfix) {
     }
     return res;
 }
+
+async function initDataBeforeDays() {
+    if (!dataBeforeDays.length) {
+        const arrUrls = beforeDaysUrlArray(
+            11,
+            "https://www.cbr-xml-daily.ru/archive/",
+            "/daily_json.js",
+        );
+        const res = await fetchBeforeDays(arrUrls);
+        dataBeforeDays = res;
+    }
+}
+
 function itemRow(valute) {
     const element = document.createElement("li");
     element.classList.add("item");
-    Object.entries(valute).forEach(([key, value]) => {
-        element.setAttribute(key, value);
-    });
+    // Object.entries(valute).forEach(([key, value]) => {
+    //     element.setAttribute(key, value);
+    // });
+    element.setAttribute("charcode", valute.CharCode);
+    element.setAttribute("name", valute.Name);
     element.innerHTML = `
         <div class='row'>
             <div class="valute-code">${valute.CharCode}</div>
@@ -83,10 +85,25 @@ function initTooltip(selector, root, item) {
         tooltip.style.opacity = "0";
     });
 }
-function CBR_XML_Daily_Ru(rates) {
-    const container = document.querySelector("#container");
-    initTooltip("#tooltip", "#container", "li");
-    Object.keys(rates.Valute).forEach(val => {
+function listDataBeforeDays(charcode) {
+    return dataBeforeDays.map(e => {
+        if ("error" in e) {
+            const el = document.createElement("li");
+            el.classList.add("item");
+            el.innerHTML = `<div class="row red"><span>${e.Date}</span> Курс ЦБ РФ на данную дату не установлен. <a href="https://www.cbr.ru/currency_base/daily/">Проверить</a>`;
+            return el;
+        }
+        const li = itemRow(e.Valute[charcode]);
+        const row = li.querySelector(".row");
+        const date = document.createElement("div");
+        const dataObject = new Date(e.Date);
+        date.innerHTML = `<div class="date">${dataObject.toLocaleDateString()}</div>`;
+        row.prepend(date);
+        return li;
+    });
+}
+function renderItems(rates) {
+    return Object.keys(rates.Valute).map(val => {
         const li = itemRow(rates.Valute[val]);
         const history = document.createElement("ul");
         history.classList.add("history");
@@ -103,30 +120,26 @@ function CBR_XML_Daily_Ru(rates) {
         head.style.position = "fix";
         history.append(head);
         li.append(history);
-        container.append(li);
+        return li;
     });
+}
+function CBR_XML_Daily_Ru(rates) {
+    const container = document.querySelector("#container");
+    initTooltip("#tooltip", "#container", "li");
+    container.append(...renderItems(rates));
     container.addEventListener("click", async ({ target }) => {
         const item = target.closest(".item");
-        const history = item.querySelector(".history");
+        //получаем код валюты по клику
         const charcode = item.getAttribute("charcode");
+        //открываем аккордион history
+        const history = item.querySelector(".history");
         history.classList.toggle("show");
+        //полужаем данные о предыдущих 10 днях в dataBeforeDays
+        //если они там уже есть то обращения к серверу не просиходит
         await initDataBeforeDays();
-        const obj = dataBeforeDays.map(e => {
-            if ("error" in e) {
-                console.log("e", e);
-                const el = document.createElement("li");
-                el.classList.add("item");
-                el.innerHTML = `<div class="row red"><span>${e.Date}</span> Курс ЦБ РФ на данную дату не установлен. <a href="https://www.cbr.ru/currency_base/daily/">Проверить</a>`;
-                return el;
-            }
-            const li = itemRow(e.Valute[charcode]);
-            const row = li.querySelector(".row");
-            const date = document.createElement("div");
-            const dataObject = new Date(e.Date);
-            date.innerHTML = `<div class="date">${dataObject.toLocaleDateString()}</div>`;
-            row.prepend(date);
-            return li;
-        });
+        //получаем список элементов с данными о предыдущих 10 днях
+        const obj = listDataBeforeDays(charcode);
+        //вставлем в аккордион
         history.append(...obj);
     });
 }
