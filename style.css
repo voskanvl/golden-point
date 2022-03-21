@@ -21,6 +21,9 @@ ul {
     margin: 0;
     padding: 0;
 }
+#container > .item:nth-child(1) {
+    margin-top: 5rem;
+}
 .item > .row {
     padding: 1rem;
     margin: 0.5rem;
@@ -29,6 +32,10 @@ ul {
     display: flex;
     justify-content: space-evenly;
     cursor: pointer;
+    text-align: center;
+}
+.item > .row > * {
+    flex: 1 1;
 }
 .item > .history {
     width: 100%;
@@ -44,4 +51,23 @@ ul {
 }
 .item > .history .row {
     border: 1px solid #fff;
+}
+.red {
+    color: red;
+}
+.fix,
+.header {
+    box-sizing: border-box;
+    position: fixed;
+    width: 100%;
+    margin: -0.5rem 0 0;
+    top: 0;
+    left: 0;
+    background: #fffc;
+}
+.header {
+    position: sticky;
+}
+.history {
+    position: relative;
 }
