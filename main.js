@@ -13,6 +13,7 @@ async function initDataBeforeDays() {
 async function fetchBeforeDays(arrUrls) {
     let res = [];
     for (let url of arrUrls) {
+        console.log(url.match(/(\d+)/g).reverse().join("."));
         try {
             let r = await fetch(url, {
                 // mode: "no-cors",
@@ -24,7 +25,11 @@ async function fetchBeforeDays(arrUrls) {
             }
         } catch (error) {
             console.log("🚀 ~ error", error);
-            res.push({ url, error });
+            res.push({
+                Date: url.match(/(\d+)/g).reverse().join("."),
+                url,
+                error,
+            });
         }
     }
     return res;
@@ -60,12 +65,15 @@ function itemRow(valute) {
     `;
     return element;
 }
-function initTooltip() {
-    const tooltip = document.querySelector("#tooltip");
+function initTooltip(selector, root, item) {
+    const container = document.querySelector(root);
+    const tooltip = document.querySelector(selector);
     container.addEventListener("mouseover", event => {
-        const li = event.target.closest("li");
-        if (li) {
-            tooltip.textContent = li.getAttribute("name");
+        const li = event.target.closest(item);
+
+        const name = li?.getAttribute("name");
+        if (li && name) {
+            tooltip.textContent = name;
             tooltip.style.opacity = "1";
             tooltip.style.top = `${event.pageY}px`;
             tooltip.style.left = `${event.pageX}px`;
@@ -77,11 +85,23 @@ function initTooltip() {
 }
 function CBR_XML_Daily_Ru(rates) {
     const container = document.querySelector("#container");
-    initTooltip();
+    initTooltip("#tooltip", "#container", "li");
     Object.keys(rates.Valute).forEach(val => {
         const li = itemRow(rates.Valute[val]);
         const history = document.createElement("ul");
         history.classList.add("history");
+        const head = document.createElement("li");
+        head.classList.add("item", "header");
+        head.innerHTML = `
+            <div class="row">
+                <div>Дата</div>
+                <div>Валюта</div>
+                <div>Курс</div>
+                <div>Изменения</div>
+            </div>
+        `;
+        head.style.position = "fix";
+        history.append(head);
         li.append(history);
         container.append(li);
     });
@@ -93,9 +113,10 @@ function CBR_XML_Daily_Ru(rates) {
         await initDataBeforeDays();
         const obj = dataBeforeDays.map(e => {
             if ("error" in e) {
+                console.log("e", e);
                 const el = document.createElement("li");
                 el.classList.add("item");
-                el.innerHTML = `<div class="row">В этот день курсы не определены</div>`;
+                el.innerHTML = `<div class="row red"><span>${e.Date}</span> Курс ЦБ РФ на данную дату не установлен. <a href="https://www.cbr.ru/currency_base/daily/">Проверить</a>`;
                 return el;
             }
             const li = itemRow(e.Valute[charcode]);
@@ -106,7 +127,6 @@ function CBR_XML_Daily_Ru(rates) {
             row.prepend(date);
             return li;
         });
-        console.log("🚀 ~ obj", obj);
         history.append(...obj);
     });
 }
