@@ -1,4 +1,16 @@
-async function fetchBeforeTenDays(arrUrls) {
+let dataBeforeDays = [];
+async function initDataBeforeDays() {
+    if (!dataBeforeDays.length) {
+        const arrUrls = beforeDaysUrlArray(
+            11,
+            "https://www.cbr-xml-daily.ru/archive/",
+            "/daily_json.js",
+        );
+        const res = await fetchBeforeDays(arrUrls);
+        dataBeforeDays = res;
+    }
+}
+async function fetchBeforeDays(arrUrls) {
     let res = [];
     for (let url of arrUrls) {
         try {
@@ -12,12 +24,13 @@ async function fetchBeforeTenDays(arrUrls) {
             }
         } catch (error) {
             console.log("🚀 ~ error", error);
+            res.push({ url, error });
         }
     }
     return res;
 }
 
-function beforeTenDaysUrlArray(volume, prefix, postfix) {
+function beforeDaysUrlArray(volume, prefix, postfix) {
     const date = new Date(Date.now());
     const day = date.getDate();
     const res = [];
@@ -29,18 +42,18 @@ function beforeTenDaysUrlArray(volume, prefix, postfix) {
     }
     return res;
 }
-function itemRow(val) {
+function itemRow(valute) {
     const element = document.createElement("li");
     element.classList.add("item");
-    Object.entries(val).forEach(([key, value]) => {
+    Object.entries(valute).forEach(([key, value]) => {
         element.setAttribute(key, value);
     });
     element.innerHTML = `
         <div class='row'>
-            <div class="valute-name">${val.CharCode}</div>
-            <div class="valute-name">${val.Value}</div>
-            <div class="valute-name">${(
-                (+val.Value / +val.Previous) *
+            <div class="valute-code">${valute.CharCode}</div>
+            <div class="valute-value">${valute.Value}</div>
+            <div class="valute-percent">${(
+                (+valute.Value / +valute.Previous) *
                 100
             ).toFixed(1)}%</div>
         </div>
@@ -67,21 +80,33 @@ function CBR_XML_Daily_Ru(rates) {
     initTooltip();
     Object.keys(rates.Valute).forEach(val => {
         const li = itemRow(rates.Valute[val]);
-        const history = document.createElement("div");
+        const history = document.createElement("ul");
         history.classList.add("history");
         li.append(history);
         container.append(li);
     });
-    container.addEventListener("click", ({ target }) => {
+    container.addEventListener("click", async ({ target }) => {
         const item = target.closest(".item");
         const history = item.querySelector(".history");
+        const charcode = item.getAttribute("charcode");
         history.classList.toggle("show");
+        await initDataBeforeDays();
+        const obj = dataBeforeDays.map(e => {
+            if ("error" in e) {
+                const el = document.createElement("li");
+                el.classList.add("item");
+                el.innerHTML = `<div class="row">В этот день курсы не определены</div>`;
+                return el;
+            }
+            const li = itemRow(e.Valute[charcode]);
+            const row = li.querySelector(".row");
+            const date = document.createElement("div");
+            const dataObject = new Date(e.Date);
+            date.innerHTML = `<div class="date">${dataObject.toLocaleDateString()}</div>`;
+            row.prepend(date);
+            return li;
+        });
+        console.log("🚀 ~ obj", obj);
+        history.append(...obj);
     });
-
-    const arrUrls = beforeTenDaysUrlArray(
-        10,
-        "https://www.cbr-xml-daily.ru/archive/",
-        "/daily_json.js",
-    );
-    fetchBeforeTenDays(arrUrls).then(console.log);
 }
