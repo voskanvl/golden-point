@@ -22,7 +22,6 @@ Object.defineProperties(currentValute, {
 async function fetchBeforeDays(arrUrls) {
     let res = [];
     for (let url of arrUrls) {
-        console.log(url.match(/(\d+)/g).reverse().join("."));
         try {
             let r = await fetch(url);
             if (r.ok) {
