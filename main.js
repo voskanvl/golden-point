@@ -1,13 +1,21 @@
 let dataBeforeDays = [];
 const currentValute = { _value: "" };
-Object.defineProperty(currentValute, "value", {
-    get() {
-        return this._value;
+Object.defineProperties(currentValute, {
+    value: {
+        get() {
+            return this._value;
+        },
+        set(v) {
+            this._value = v;
+            //обновляем содержимое всех .current-valute
+            const currents = document.querySelectorAll(".current-valute");
+            if (currents.length) currents.forEach(e => (e.textContent = v));
+        },
     },
-    set(v) {
-        this._value = v;
-        const current = document.querySelector("#current-valute");
-        if (current) current.textContent = v;
+    _value: {
+        configurable: false,
+        enumerable: false,
+        writable: false,
     },
 });
 
@@ -98,7 +106,6 @@ function initTooltip(selector, root, item) {
         const name = li?.getAttribute("name");
         if (li && name) {
             currentValute.value = name;
-            tooltip.textContent = name;
             tooltip.style.opacity = "1";
             tooltip.style.top = `${event.pageY + 5}px`;
             tooltip.style.left = `${event.pageX + 5}px`;
@@ -148,6 +155,7 @@ function renderItems(rates) {
     });
 }
 function setTitleTime() {
+    //указываем текущцю дату в футере
     const nowTitle = document.querySelector("#now");
     nowTitle.innerHTML = new Date(Date.now()).toLocaleDateString();
 }
