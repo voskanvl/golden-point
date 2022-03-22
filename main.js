@@ -1,4 +1,15 @@
 let dataBeforeDays = [];
+const currentValute = { _value: "" };
+Object.defineProperty(currentValute, "value", {
+    get() {
+        return this._value;
+    },
+    set(v) {
+        this._value = v;
+        const current = document.querySelector("#current-valute");
+        if (current) current.textContent = v;
+    },
+});
 
 async function fetchBeforeDays(arrUrls) {
     let res = [];
@@ -34,7 +45,13 @@ function beforeDaysUrlArray(volume, prefix, postfix) {
     }
     return res;
 }
-
+function removeRemovable() {
+    const items = document.querySelectorAll(".header");
+    items.forEach(item => {
+        const toRemove = item.querySelector(".to-remove");
+        toRemove.remove();
+    });
+}
 async function initDataBeforeDays() {
     if (!dataBeforeDays.length) {
         const arrUrls = beforeDaysUrlArray(
@@ -44,6 +61,7 @@ async function initDataBeforeDays() {
         );
         const res = await fetchBeforeDays(arrUrls);
         dataBeforeDays = res;
+        removeRemovable();
     }
 }
 
@@ -79,10 +97,11 @@ function initTooltip(selector, root, item) {
 
         const name = li?.getAttribute("name");
         if (li && name) {
+            currentValute.value = name;
             tooltip.textContent = name;
             tooltip.style.opacity = "1";
-            tooltip.style.top = `${event.pageY}px`;
-            tooltip.style.left = `${event.pageX}px`;
+            tooltip.style.top = `${event.pageY + 5}px`;
+            tooltip.style.left = `${event.pageX + 5}px`;
         }
     });
     container.addEventListener("mouseout", event => {
@@ -120,6 +139,7 @@ function renderItems(rates) {
                 <div>Курс</div>
                 <div>Изменения</div>
             </div>
+            <div class="row to-remove">Данные загружаются ... </div>
         `;
         head.style.position = "fix";
         history.append(head);
@@ -127,7 +147,12 @@ function renderItems(rates) {
         return li;
     });
 }
+function setTitleTime() {
+    const nowTitle = document.querySelector("#now");
+    nowTitle.innerHTML = new Date(Date.now()).toLocaleDateString();
+}
 function CBR_XML_Daily_Ru(rates) {
+    setTitleTime();
     const container = document.querySelector("#container");
     initTooltip("#tooltip", "#container", "li");
     container.append(...renderItems(rates));
