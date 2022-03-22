@@ -12,6 +12,7 @@ body {
     top: 0;
     left: 0;
     transition: 100ms;
+    z-index: 10;
 }
 ul {
     padding: 0;
