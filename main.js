@@ -62,7 +62,11 @@ function itemRow(valute) {
             <div class="valute-percent">${(
                 (+valute.Value / +valute.Previous) *
                 100
-            ).toFixed(1)}%</div>
+            ).toFixed(1)}% <span class="${
+        +valute.Value / +valute.Previous > 1 ? "up" : "down"
+    }">${
+        +valute.Value / +valute.Previous > 1 ? "&#9650;" : "&#9660;"
+    }</span></div>
         </div>
     `;
     return element;

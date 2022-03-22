@@ -21,6 +21,19 @@ ul {
     margin: 0;
     padding: 0;
 }
+.row {
+    border: 1px solid transparent;
+    transition: border 0.4s;
+}
+.item:hover > .row {
+    border: 1px solid #333;
+}
+.item:hover > .row > * {
+    font-weight: bold;
+}
+.fix:hover > .row {
+    border: 1px solid transparent;
+}
 #container > .item:nth-child(1) {
     margin-top: 5rem;
 }
@@ -70,4 +83,10 @@ ul {
 }
 .history {
     position: relative;
+}
+span.up {
+    color: green;
+}
+span.down {
+    color: red;
 }
