@@ -76,9 +76,6 @@ async function initDataBeforeDays() {
 function itemRow(valute) {
     const element = document.createElement("li");
     element.classList.add("item");
-    // Object.entries(valute).forEach(([key, value]) => {
-    //     element.setAttribute(key, value);
-    // });
     element.setAttribute("charcode", valute.CharCode);
     element.setAttribute("name", valute.Name);
     element.innerHTML = `
