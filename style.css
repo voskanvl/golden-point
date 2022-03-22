@@ -64,6 +64,14 @@ ul {
 .item > .history .row {
     border: 1px solid #fff;
 }
+.item > .history .header {
+    position: sticky;
+    box-shadow: inset 0 0.5rem 0.5rem #000;
+    background: #000a;
+    color: #fff;
+    z-index: 8;
+}
+
 .red {
     color: red;
 }
@@ -75,15 +83,10 @@ ul {
     margin: -0.5rem 0 0;
     top: 0;
     left: 0;
-    position: sticky;
     background: #fffa;
-    box-shadow: inset 0 0.5rem 0.5rem #000;
+    z-index: 9;
 }
 
-.history .header {
-    background: #000a;
-    color: #fff;
-}
 .history .header > .row {
     margin: 0;
     border: none;
