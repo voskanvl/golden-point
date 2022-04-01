@@ -1,0 +1,23 @@
+{
+    "name": "golden-point",
+    "version": "1.0.0",
+    "description": "",
+    "main": "main.js",
+    "scripts": {
+        "start": "http-server"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/voskanvl/golden-point.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/voskanvl/golden-point/issues"
+    },
+    "homepage": "https://github.com/voskanvl/golden-point#readme",
+    "dependencies": {
+        "http-server": "^14.1.0"
+    }
+}
