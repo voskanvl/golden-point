@@ -49,6 +49,9 @@ ul {
     cursor: pointer;
     text-align: center;
 }
+ header.item > .row{
+    background: linear-gradient(to bottom, #eee 60%, transparent);
+ }
 .item > .row > * {
     flex: 1 1;
 }
@@ -85,7 +88,6 @@ ul {
     margin: -0.5rem 0 0;
     top: 0;
     left: 0;
-    background: #fffa;
     z-index: 9;
 }
 
